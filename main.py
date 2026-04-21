@@ -110,6 +110,7 @@ def parse_args():
     parser.add_argument("--TET-phi", type=float, default=1.0)
     parser.add_argument("--TET-lambda", type=float, default=0.0)
 
+    parser.add_argument("--clamp-matmul", action="store_true", help="Clamp negative matmul outputs to 0")
     parser.add_argument("--save-latest", action="store_true")
     parser.add_argument("--test-only", action="store_true", help="Only test the model")
     parser.add_argument("--amp", type=bool, default=True, help="Use AMP training")
@@ -859,6 +860,7 @@ def main():
         T=args.T,
         num_classes=num_classes,
         img_size=input_size[-1],
+        clamp_matmul=args.clamp_matmul,
     ).cuda()
 
     # transfer
@@ -1048,9 +1050,12 @@ def main():
 
         if max_acc1 < test_acc1:
             max_acc1 = test_acc1
-            save_on_master(
-                checkpoint, os.path.join(args.output_dir, "checkpoint_max_acc1.pth")
-            )
+            ckpt_path = os.path.join(args.output_dir, "checkpoint_max_acc1.pth")
+            save_on_master(checkpoint, ckpt_path)
+            if wandb_run is not None and is_main_process():
+                artifact = wandb.Artifact("checkpoint_best", type="model")
+                artifact.add_file(ckpt_path)
+                wandb_run.log_artifact(artifact)
 
     logger.info("Training completed.")
 
@@ -1069,6 +1074,7 @@ def main():
         T=args.T,
         num_classes=num_classes,
         img_size=input_size[-1],
+        clamp_matmul=args.clamp_matmul,
     )
 
     try:

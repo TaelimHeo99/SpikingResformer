@@ -65,13 +65,17 @@ class BN(nn.Module):
 
 
 class SpikingMatmul(nn.Module):
-    def __init__(self, spike: str) -> None:
+    def __init__(self, spike: str, clamp: bool = False) -> None:
         super().__init__()
         assert spike == "l" or spike == "r" or spike == "both"
         self.spike = spike
+        self.clamp = clamp
 
     def forward(self, left: torch.Tensor, right: torch.Tensor):
-        return torch.matmul(left, right)
+        out = torch.matmul(left, right)
+        if self.clamp:
+            out = out.clamp(min=0)
+        return out
 
 
 class Conv3x3(layer.Conv2d):

@@ -43,7 +43,7 @@ class GWFFN(nn.Module):
 
 
 class DSSA(nn.Module):
-    def __init__(self, dim, num_heads, lenth, patch_size, activation=LIF):
+    def __init__(self, dim, num_heads, lenth, patch_size, activation=LIF, clamp_matmul=False):
         super().__init__()
         assert dim % num_heads == 0, f"dim {dim} should be divided by num_heads {num_heads}."
         self.dim = dim
@@ -59,8 +59,8 @@ class DSSA(nn.Module):
 
         self.W = layer.Conv2d(dim, dim * 2, patch_size, patch_size, bias=False, step_mode='m')
         self.norm = BN(dim * 2)
-        self.matmul1 = SpikingMatmul('r')
-        self.matmul2 = SpikingMatmul('r')
+        self.matmul1 = SpikingMatmul('r', clamp=clamp_matmul)
+        self.matmul2 = SpikingMatmul('r', clamp=clamp_matmul)
         self.activation_attn = activation()
         self.activation_out = activation()
 
@@ -138,6 +138,7 @@ class SpikingResformer(nn.Module):
         prologue=None,
         group_size=64,
         activation=LIF,
+        clamp_matmul=False,
         **kwargs,
     ):
         super().__init__()
@@ -166,7 +167,7 @@ class SpikingResformer(nn.Module):
                 if name == 'DSSA':
                     sub_layers.append(
                         DSSA(planes[idx], num_heads[idx], (img_size // patch_sizes[idx])**2,
-                             patch_sizes[idx], activation=activation))
+                             patch_sizes[idx], activation=activation, clamp_matmul=clamp_matmul))
                 elif name == 'GWFFN':
                     sub_layers.append(
                         GWFFN(planes[idx], group_size=group_size, activation=activation))
