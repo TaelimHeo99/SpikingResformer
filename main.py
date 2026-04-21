@@ -1082,6 +1082,7 @@ def main():
             os.path.join(args.output_dir, "checkpoint_max_acc1.pth"), map_location="cpu"
         )
         model.load_state_dict(checkpoint["model"])
+        model.cuda()
     except:
         logger.warning("Cannot load max acc1 model, skip test.")
         logger.warning("Exit.")

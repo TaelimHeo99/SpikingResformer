@@ -134,3 +134,4 @@ datasets/
 log/
 logs/
 .vscode/
+pretrained/
