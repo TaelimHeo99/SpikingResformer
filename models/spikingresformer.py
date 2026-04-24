@@ -43,7 +43,7 @@ class GWFFN(nn.Module):
 
 
 class DSSA(nn.Module):
-    def __init__(self, dim, num_heads, lenth, patch_size, activation=LIF, clamp_matmul=False):
+    def __init__(self, dim, num_heads, lenth, patch_size, activation=LIF, clamp_matmul="none"):
         super().__init__()
         assert dim % num_heads == 0, f"dim {dim} should be divided by num_heads {num_heads}."
         self.dim = dim
@@ -138,7 +138,7 @@ class SpikingResformer(nn.Module):
         prologue=None,
         group_size=64,
         activation=LIF,
-        clamp_matmul=False,
+        clamp_matmul="none",
         **kwargs,
     ):
         super().__init__()

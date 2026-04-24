@@ -64,17 +64,30 @@ class BN(nn.Module):
         return functional.seq_to_ann_forward(x, self.bn)
 
 
+class _ClampSTE(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x):
+        return x.clamp(min=0)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return grad_output
+
+
 class SpikingMatmul(nn.Module):
-    def __init__(self, spike: str, clamp: bool = False) -> None:
+    def __init__(self, spike: str, clamp: str = "none") -> None:
         super().__init__()
         assert spike == "l" or spike == "r" or spike == "both"
+        assert clamp in ("none", "clamp", "ste")
         self.spike = spike
         self.clamp = clamp
 
     def forward(self, left: torch.Tensor, right: torch.Tensor):
         out = torch.matmul(left, right)
-        if self.clamp:
+        if self.clamp == "clamp":
             out = out.clamp(min=0)
+        elif self.clamp == "ste":
+            out = _ClampSTE.apply(out)
         return out
 
 

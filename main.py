@@ -110,7 +110,7 @@ def parse_args():
     parser.add_argument("--TET-phi", type=float, default=1.0)
     parser.add_argument("--TET-lambda", type=float, default=0.0)
 
-    parser.add_argument("--clamp-matmul", action="store_true", help="Clamp negative matmul outputs to 0")
+    parser.add_argument("--clamp-matmul", type=str, default="none", choices=["none", "clamp", "ste"], help="Clamp negative matmul outputs: none / clamp / ste (straight-through)")
     parser.add_argument("--save-latest", action="store_true")
     parser.add_argument("--test-only", action="store_true", help="Only test the model")
     parser.add_argument("--amp", type=bool, default=True, help="Use AMP training")
