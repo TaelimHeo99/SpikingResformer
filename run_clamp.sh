@@ -4,7 +4,7 @@ python main.py \
   --data-path ./datasets/DVS128Gesture \
   --output-dir ./logs/transfer_dvs128gesture_clamp \
   --transfer ./pretrained/spikingresformer_ti.pth \
-  --clamp-matmul \
+  --clamp-matmul clamp \
   --wandb-project spikingresformer \
   --wandb-name transfer_dvs128gesture_clamp \
   --save-latest
