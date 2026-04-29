@@ -1,9 +1,11 @@
 """HuggingFace imagenet-1k (parquet) → ImageFolder 구조로 변환"""
 import os
+import glob
 import argparse
 from datasets import load_dataset
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--input-dir", default="/data/imagenet")
 parser.add_argument("--output-dir", default="./datasets/imagenet")
 parser.add_argument("--split", default="all", choices=["all", "train", "validation"])
 args = parser.parse_args()
@@ -13,7 +15,8 @@ split_map = {"train": "train", "validation": "val"}
 
 for split in splits:
     print(f"Loading {split}...")
-    ds = load_dataset("imagenet-1k", split=split, trust_remote_code=True)
+    parquet_files = sorted(glob.glob(os.path.join(args.input_dir, "data", f"{split}-*.parquet")))
+    ds = load_dataset("parquet", data_files={split: parquet_files}, split=split)
     label_names = ds.features["label"].names
     out_dir = os.path.join(args.output_dir, split_map[split])
 
